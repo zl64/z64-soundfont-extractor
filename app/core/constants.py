@@ -1,0 +1,98 @@
+from pathlib import Path
+
+from app.core.enums import Game
+
+
+GUI_DIR: Path = Path(__file__).resolve().parents[2]
+OUT_DIR: Path = GUI_DIR / 'extracted'
+GUI_FILE: Path = GUI_DIR / 'gui.pyw'
+
+
+ROM_EXTS: tuple[str] = ('.z64', '.n64', '.v64')
+
+
+VANILLA_SOUNDFONT_MD5_HASHES: dict[Game, list[str]] = {
+    Game.OCARINA_OF_TIME: [
+        'ea26ffbb65a3818cbdf165c7ccc35942',
+        '27c750baa420a50c72c8b7a8f8633506',
+        '1b4f87a0fbda7af83e4a3bc854a80573',
+        'f851db888420a85e2a5cd4b1415acd1e',
+        '3668d11b33326c053704cc9778dad5ed',
+        '1575eff7c671932ba32b81e8ea83045b',
+        'adb09c6c7190b8e24d5e9918cff2443d',
+        'bcb91f7d297653ee0adc624094bbf054',
+        'a5dbd76e14c7aed6c5a16ff9d798689f',
+        'df33da8bf44027c4b4b0cc619794bee5',
+        '399e1f09c193bb8d62b8a322b75ae4c2',
+        '8e824dc87b1e76bd93f2d1eb339a7bd0',
+        '8388fe6a7e1c1e99537de819be9c057f',
+        '55d460d57c540b5aacdd576c2db9415c',
+        '20a9c8d491c011c3b0cd0fc83c695b7c',
+        '76094e664276a8107ef8af4f3b776659',
+        '94c4cde689b23785ac5270570d6ea9a8',
+        '2256e64605a9da6235f027cd73234454',
+        'ecab64d615dfe0536173821d6d06d334',
+        '02f3a7da86f596b6a7829a654c96c9f8',
+        'c5e17760352eb0b17ad1038aded0a9cc',
+        'b4c9c45c7d885853d7b1f75ebe710700',
+        '132f627aa099ba28fd291c5375355a9e',
+        'c9d8ce5734fec3067f9ed4b01741ac21',
+        '690475802d41b874a0b3e2328a15db2b',
+        'a37388a7414fc2ac05691be72c753366',
+        'c186460d9696cddf2cbb7890bc2ea1d6',
+        '1f31b10ce531d7418f8a94ff96d8b726',
+        'aaddf95223fe146c964361f2014b9e82',
+        '9538afb957aef62c2ee2792d049938d0',
+        '1dc89d70db5d84ddbe728e37e0c6cca3',
+        '9824d2d9488f07273fc9693498c2f029',
+        'e545641c535b5a7c235c523a67e6959c',
+        '786c42dd0894d1b7ce0479a6cafc523d',
+        '1674626eca372e60e241cab1125364b7',
+        '63d8832b2467bae8d1545f6fe01f7957',
+        '116bf84ebb6d0a6037a582a460b24553',
+        '280fdb4d6dd3fdcddf27d0b8721eca4a',
+    ],
+    Game.MAJORAS_MASK: [
+        'cba1e9ddd1e534595c8c7c963b640f44',
+        'b357bed90b5a83eaccd8d52e23cfd355',
+        'f65ba401cca7a53e84270542f6077b81',
+        '92e4fe285db4d830a30ac4aeb9984327',
+        'b698272996665d97d1b43035f8e290e5',
+        '8c08b4d310ad9a6802c9396dd7cdcb64',
+        '3fb35d82d9b20d2b2626cd33aeffa1f3',
+        'fcc1be3116de0c6e276b39e35ee1caeb',
+        '9fa6dab6e88faf5bda16a5b6fdd33bc6',
+        '27ded428c42c7fbb5156911ed9af5f6f',
+        'b4e63ee053fd87b9f25aea0cdeb25c52',
+        'bd70db424cb21fa44da7c7b323fff4cf',
+        'c57117ee5a97edfb145be9ef772e0060',
+        '836ed904273ea371ae7939cdd937de6c',
+        '7a2b6503b99a4eac0154d407be18e347',
+        '105c378def5d03771828ddaaedba2ae4',
+        '4d5874949f91f0590168d0308da47b26',
+        'a33693602be931390b1773bb957536b9',
+        '290aec96de1815b55eda232b08671c8e',
+        'c4f49aec1049d41289be885a942e5b12',
+        'def6040811d4c1debdae7223f47f94c1',
+        '153b8aa382277c1db2c1901794c8061e',
+        'e1e0734b8f438446867ac3f314b2def7',
+        '8f0d839bd5a1308b00727afb14b61796',
+        '80cbfe712340827fc608a30e78dba56b',
+        '34f4f2af94f0dc2e18a49e00562a7f5f',
+        '19e6872375cab8fde05e0e5f856c06bf',
+        'b270541c72dc8bc015dbe1b4f604c847',
+        '56938686da4b06b841156dc1152f7622',
+        '5a88b122e9ba2af2560404994ab6a5d2',
+        '667d1c8ee3244ff3fe925c3a51458cc4',
+        '3705c27811d20546adabaa315dede49c',
+        'a2d3dd0151d4245971cbf158a14301ab',
+        'a8ef8c0fa5916ef02ee015851aaa92cc',
+        '931f2fb8e280d4969647a05f548efb98',
+        '3576c9db7909d44c0f0a2d5d1c73e0c0',
+        'c2cd703125fa3115283d5803a0f68da5',
+        'a83178ff6ac2c435a64b4af807876d75',
+        'aa1c72ea68946acdda54c53e553caaf4',
+        '3705c27811d20546adabaa315dede49c',
+        '0ed45d14a9efaac20999668015dc503a',
+    ]
+}
