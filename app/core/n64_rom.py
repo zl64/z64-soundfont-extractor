@@ -162,8 +162,11 @@ class ROM:
     def __init__(self, file_path: str) -> None:
         self.file_path: Path = Path(file_path)
 
-        if not self.file_path.exists() or self.file_path.stat().st_size != self._ROM_SIZE:
-            raise ValueError(f'Invalid ROM size, expected {self._ROM_SIZE}, got {self.file_path.stat().st_size} ')
+        if not self.file_path.exists():
+            raise FileNotFoundError(f'System could not find the file specified')
+
+        if self.file_path.stat().st_size != self._ROM_SIZE:
+            raise ValueError(f'Invalid ROM size, expected {self._ROM_SIZE}, got {self.file_path.stat().st_size}')
 
         self._file = self.file_path.open('rb')
         self._mmap = mmap.mmap(self._file.fileno(), 0, access=mmap.ACCESS_READ)
