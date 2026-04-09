@@ -7,6 +7,18 @@ class Game(Enum):
     MAJORAS_MASK = 'ZS'
 
 
+class Version(Enum):
+    ''' Represents the region and version of a Nintendo 64 ROM. '''
+    NTSC_J_0 = 'ntsc_j_0'
+    NTSC_J_1 = 'ntsc_j_1'
+    NTSC_J_2 = 'ntsc_j_2'
+    NTSC_U_0 = 'ntsc_u_0'
+    NTSC_U_1 = 'ntsc_u_1'
+    NTSC_U_2 = 'ntsc_u_2'
+    PAL_0 = 'pal_0'
+    PAL_1 = 'pal_1'
+
+
 class Endian(Enum):
     ''' Represents binary data byte ordering. '''
     BIG = 0

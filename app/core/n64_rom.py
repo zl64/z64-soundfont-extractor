@@ -4,7 +4,7 @@ import hashlib
 import mmap
 from pathlib import Path
 
-from app.core.enums import Game, Endian
+from app.core.enums import DestinationCode, Game, Endian, Version
 from app.core.n64_reader import BinaryReader, ReaderMode
 from app.core.n64_header import RomHeader
 
@@ -85,15 +85,71 @@ class ROM:
     _ROM_SIZE: int = 64 * 1024 * 1024 # 64 MiB
     _TABLE_ENTRY_SIZE: int = 0x10
 
-    _AUDIOBIN_ITEMS: dict[Game, dict[str, Item]] = {
+    _AUDIOBIN_ITEMS: dict[Game, dict[Version, dict[str, Item]]] = {
         Game.OCARINA_OF_TIME: {
-            'Audiobank': Item(offset=0x0000D390, length=0x0001CA50),
-            'Audiobank_index': Item(offset=0x00B896A0, length=0x00000270),
+            Version.NTSC_J_0: {
+                'Audiobank': Item(offset=0x0000D390, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B896A0, length=0x00000270),
+            },
+            Version.NTSC_J_1: {
+                'Audiobank': Item(offset=0x0000D390, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B89860, length=0x00000270),
+            },
+            Version.NTSC_J_2: {
+                # audiobank length = 2BDC0(?)
+                # audioseq start = 39680 and all data between audiobank end and audioseq start is \x00
+                'Audiobank': Item(offset=0x0000D8C0, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B89710, length=0x00000270),
+            },
+            Version.NTSC_U_0: {
+                'Audiobank': Item(offset=0x0000D390, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B896A0, length=0x00000270),
+            },
+            Version.NTSC_U_1: {
+                'Audiobank': Item(offset=0x0000D390, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B89860, length=0x00000270),
+            },
+            Version.NTSC_U_2: {
+                # audiobank length = 2BDC0(?)
+                # audioseq start = 39680 and all data between audiobank end and audioseq start is \x00
+                'Audiobank': Item(offset=0x0000D8C0, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B89710, length=0x00000270),
+            },
+            Version.PAL_0: {
+                # audiobank length = 2BDC0(?)
+                # audioseq start = 39680 and all data between audiobank end and audioseq start is \x00
+                'Audiobank': Item(offset=0x0000D8C0, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B88E60, length=0x00000270),
+            },
+            Version.PAL_1: {
+                # audiobank length = 2BDC0(?)
+                # audioseq start = 39680 and all data between audiobank end and audioseq start is \x00
+                'Audiobank': Item(offset=0x0000D8C0, length=0x0001CA50),
+                'Audiobank_index': Item(offset=0x00B88EA0, length=0x00000270),
+            },
         },
         Game.MAJORAS_MASK: {
-            'Audiobank': Item(offset=0x00020700, length=0x000263F0),
-            'Audiobank_index': Item(offset=0x00C776C0, length=0x000002A0),
-        }
+            Version.NTSC_J_0: {
+                'Audiobank': Item(offset=0x000222F0, length=0x00025E70),
+                'Audiobank_index': Item(offset=0x00C97130, length=0x00000280),
+            },
+            Version.NTSC_J_1: {
+                'Audiobank': Item(offset=0x00022230, length=0x00025E70),
+                'Audiobank_index': Item(offset=0x00C974A0, length=0x00000280),
+            },
+            Version.NTSC_U_0: {
+                'Audiobank': Item(offset=0x00020700, length=0x000263F0),
+                'Audiobank_index': Item(offset=0x00C776C0, length=0x000002A0),
+            },
+            Version.PAL_0: {
+                'Audiobank': Item(offset=0x000209A0, length=0x000263F0),
+                'Audiobank_index': Item(offset=0x00DBC910, length=0x000002A0),
+            },
+            Version.PAL_1: {
+                'Audiobank': Item(offset=0x00020C20, length=0x000263F0),
+                'Audiobank_index': Item(offset=0x00DBCA30, length=0x000002A0),
+            },
+        },
     }
 
     _ENDIAN_TO_READER_MODE: dict[Endian, ReaderMode] = {
@@ -125,6 +181,7 @@ class ROM:
         )
 
         self.game: Game = self._detect_game()
+        self.version: str = self._detect_version()
 
     def _detect_endianness(self) -> Endian:
         ''' Detects the ROM file's byte order based on its first 4 bytes. '''
@@ -138,12 +195,15 @@ class ROM:
         # 2. Little Endian - words store their LSB at the lowest possible address
         # 3. Byteswapped Big - big endian, but 16-bit words have their bytes swapped
         # 4. Byteswapped Little - little endian, but 16-bit words have their bytes swapped
-        return {
-            0x80371240: Endian.BIG,
-            0x40123780: Endian.LITTLE,
-            0x37804012: Endian.BYTESWAPPED_BIG,
-            0x12408037: Endian.BYTESWAPPED_LITTLE,
-        }.get(magic_word)
+        try:
+            return {
+                0x80371240: Endian.BIG,
+                0x40123780: Endian.LITTLE,
+                0x37804012: Endian.BYTESWAPPED_BIG,
+                0x12408037: Endian.BYTESWAPPED_LITTLE,
+            }[magic_word]
+        except KeyError:
+            raise ValueError(f'Unkown ROM magic word: 0x{magic_word:08X}')
 
     def _detect_game(self) -> Game:
         ''' Detects the Nintendo 64 game the ROM file belongs to. '''
@@ -165,6 +225,31 @@ class ROM:
                 return Game.MAJORAS_MASK
             case _:
                 raise ValueError(f'Unknown or unsupported Nintendo 64 game: {code}')
+
+    def _detect_version(self) -> str:
+        ''' Detects the region and version of an Ocarina of Time or Majora's Mask ROM. '''
+        region: DestinationCode = self.header.game_code.destination_code
+        version: int = self.header.rom_version
+
+        try:
+            return {
+                DestinationCode.JAPAN : {
+                    0: Version.NTSC_J_0,
+                    1: Version.NTSC_J_1,
+                    2: Version.NTSC_J_2,
+                },
+                DestinationCode.NORTH_AMERICA: {
+                    0: Version.NTSC_U_0,
+                    1: Version.NTSC_U_1,
+                    2: Version.NTSC_U_2,
+                },
+                DestinationCode.EUROPE_P: {
+                    0: Version.PAL_0,
+                    1: Version.PAL_1,
+                },
+            }[region][version]
+        except KeyError:
+            raise ValueError(f'Unknown region or version: {region=} {version=}')
 
     def get_soundfonts(self) -> list[Soundfont]:
         ''' Extract all soundfonts from the ROM file. '''
@@ -199,7 +284,7 @@ class ROM:
         ''' Return the ROM offsets and lengths for its `audiobank` and their table entries. '''
         if self.game is None:
             raise ValueError('Game not detected, cannot get items')
-        entry = self._AUDIOBIN_ITEMS[self.game]
+        entry = self._AUDIOBIN_ITEMS[self.game][self.version]
         return (entry['Audiobank'], entry['Audiobank_index'])
 
     @cached_property
@@ -210,11 +295,34 @@ class ROM:
     @property
     def is_valid(self) -> bool:
         ''' Checks if the ROM file is valid. '''
-        return (
-            self.file_path.stat().st_size == self._ROM_SIZE
-            and self.game is not None
-            and self.endian is not None
-        )
+        if (
+            self.file_path.stat().st_size != self._ROM_SIZE
+            or self.game is None
+            or self.endian is None
+            or self.version is None
+        ):
+            return False
+
+        # All modding for Ocarina of Time is generally done on
+        # NTSC versions 1.0. However, the audio binary remains
+        # at the same memory addresses between 1.0 and 1.1 as
+        # the soundfont hashes are the same. The only changes
+        # between NTSC-J and NTSC-U is a language flag.
+        if self.game == Game.OCARINA_OF_TIME:
+            return self.version in {
+                Version.NTSC_J_0,
+                Version.NTSC_U_0,
+                Version.NTSC_J_1,
+                Version.NTSC_U_1,
+            }
+
+        # All modding for Majora's Mask is generally done on
+        # NTSC-U version 1.0. There are major changes between
+        # every version of Majora's Mask.
+        if self.game == Game.MAJORAS_MASK:
+            return self.version == Version.NTSC_U_0
+
+        return True
 
     # Context manager support
     def close(self):
