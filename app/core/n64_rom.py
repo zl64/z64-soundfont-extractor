@@ -9,14 +9,14 @@ from app.core.n64_reader import BinaryReader, ReaderMode
 from app.core.n64_header import RomHeader
 
 
-@dataclass(slots=True)
+@dataclass
 class Item:
     ''' Represents the offset and length of arbitrary data on a Nintendo 64 ROM. '''
     offset: int
     length: int
 
 
-@dataclass(slots=True)
+@dataclass
 class TableEntry:
     ''' Represents a single table entry pointing to a soundfont on an Ocarina of Time or Majora's Mask ROM. '''
     index: int
@@ -39,7 +39,7 @@ class TableEntry:
         return cls(index, offset, length, data)
 
 
-@dataclass(slots=True)
+@dataclass
 class Soundfont:
     ''' Represents a soundfont stored on an Ocarina of Time or Majora's Mask ROM. '''
     index: int
@@ -48,14 +48,10 @@ class Soundfont:
     soundfont_data: bytes
     table_entry_data: bytes
 
-    _hash: str | None = None
-
-    @property
+    @cached_property
     def hash(self) -> str:
         ''' Returns the MD5 hash of the soundfont's binary data. '''
-        if self._hash is None:
-            self._hash = hashlib.md5(self.soundfont_data).hexdigest()
-        return self._hash
+        return hashlib.md5(self.soundfont_data).hexdigest()
 
     @property
     def display_name(self) -> str:

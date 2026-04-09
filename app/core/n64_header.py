@@ -7,7 +7,7 @@ from app.core.enums import CategoryCode, DestinationCode
 from app.core.n64_reader import BinaryReader
 
 
-@dataclass(slots=True)
+@dataclass
 class DomConfig:
     ''' Represents the Nintendo 64 PI DOM1 configuration stored in the Nintendo 64 ROM header. '''
     release: int = 0
@@ -30,7 +30,7 @@ class DomConfig:
         return dom_config
 
 
-@dataclass(slots=True)
+@dataclass
 class LibUltraVersion:
     ''' Represents the Nintendo 64 LibUltra version stored in a Nintendo 64 ROM header. '''
     major: int = 0
@@ -51,7 +51,7 @@ class LibUltraVersion:
         return libultra_version
 
 
-@dataclass(slots=True)
+@dataclass
 class GameCode:
     ''' Represents the Nintendo 64 game information stored in the Nintendo 64 ROM header. '''
     category_code: CategoryCode = CategoryCode.GAME_PAK
