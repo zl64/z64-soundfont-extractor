@@ -11,7 +11,7 @@ class ReaderMode(Enum):
 
 class BinaryReader:
     ''' Reads Nintendo 64 ROM binary data from a buffer, handling various Nintendo 64 ROM byte orders. '''
-    def __init__(self, buffer, *, mode: ReaderMode):
+    def __init__(self, buffer, *, mode: ReaderMode = ReaderMode.BigEndian):
         self._buffer = buffer
         self.mode = mode
 

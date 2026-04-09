@@ -191,7 +191,7 @@ class ROM:
         # The 32-bit word of Nintendo 64 ROM files is generally used to determine
         # endianness. This value is expected to always be the same for normal
         # Nintendo 64 ROM files, but it does not need to be.
-        magic_word: int = BinaryReader(self._mmap, mode=ReaderMode.BigEndian).read_u32(0)
+        magic_word: int = BinaryReader(self._mmap).read_u32(0)
 
         # There are four different endiannesses available for ROM files:
         # 1. Big Endian - words store their MSB at the lowest possible address
