@@ -181,7 +181,7 @@ class ROM:
         )
 
         self.game: Game = self._detect_game()
-        self.version: str = self._detect_version()
+        self.version: Version = self._detect_version()
 
     def _detect_endianness(self) -> Endian:
         ''' Detects the ROM file's byte order based on its first 4 bytes. '''
@@ -226,7 +226,7 @@ class ROM:
             case _:
                 raise ValueError(f'Unknown or unsupported Nintendo 64 game: {code}')
 
-    def _detect_version(self) -> str:
+    def _detect_version(self) -> Version:
         ''' Detects the region and version of an Ocarina of Time or Majora's Mask ROM. '''
         region: DestinationCode = self.header.game_code.destination_code
         version: int = self.header.rom_version
